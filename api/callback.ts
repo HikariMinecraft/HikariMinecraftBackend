@@ -18,11 +18,12 @@ export default async (req : VercelRequest, res : VercelResponse) => {
 
     const validationPayload = req.body; 
 
-    if (!validationPayload || typeof validationPayload.EventTs !== 'string' || typeof validationPayload.PlainToken !== 'string') {
+    if (!validationPayload || typeof validationPayload['d']['event_ts'] !== 'string' || typeof validationPayload['d']['plain_token'] !== 'string') {
         return res.status(400).json({ error: "Invalid payload: Missing EventTs or PlainToken." });
     }
 
-    const { EventTs, PlainToken } = validationPayload;
+    const EventTs = validationPayload['d']['event_ts'];
+    const PlainToken = validationPayload['d']['plain_token'];
 
     try {
         let seedStr = BOT_SECRET;
@@ -50,8 +51,8 @@ export default async (req : VercelRequest, res : VercelResponse) => {
         const signature = Buffer.from(signatureUint8Array).toString('hex'); 
 
         const responsePayload = {
-            PlainToken: PlainToken,
-            Signature: signature,
+            plain_token: PlainToken,
+            signature: signature,
         };
         
         return res.status(200).json(responsePayload);
