@@ -1,13 +1,13 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
 
-const ed = require('@noble/ed25519');
-const { Buffer } = require('buffer');
+import * as ed from '@noble/ed25519'
+import { Buffer } from 'buffer'
 
 const ED25519_SEED_SIZE = 32;
 
 const BOT_SECRET = process.env.BOT_SECRET; 
 
-module.exports = async (req : VercelRequest, res : VercelResponse) => {
+export default async (req : VercelRequest, res : VercelResponse) => {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
@@ -31,14 +31,21 @@ module.exports = async (req : VercelRequest, res : VercelResponse) => {
         }
         seedStr = seedStr.substring(0, ED25519_SEED_SIZE);
         
-        const seedUint8Array = Buffer.from(seedStr, 'utf8');
+    // Create a 32-byte seed and use it as the private key for noble-ed25519.
+    // Note: we ensure seedStr was trimmed/padded to 32 characters above. Using
+    // utf8 here is safe if the BOT_SECRET is ASCII; if you expect arbitrary
+    // bytes consider storing the secret as hex/base64 and decoding instead.
+    const seedUint8Array = Buffer.from(seedStr, 'utf8');
 
-        const privateKeyUint8Array = ed.getPrivateKeySync(seedUint8Array);
+    // noble-ed25519 accepts a 32-byte private key (Uint8Array). Use the seed
+    // directly as the private key. If you need a derived keypair or different
+    // handling, replace this with a proper KDF.
+    const privateKeyUint8Array = seedUint8Array;
 
         const messageToSign = EventTs + PlainToken;
         const messageBuffer = Buffer.from(messageToSign, 'utf8');
 
-        const signatureUint8Array = await ed.sign(messageBuffer, privateKeyUint8Array);
+        const signatureUint8Array = await ed.signAsync(messageBuffer, privateKeyUint8Array);
         
         const signature = Buffer.from(signatureUint8Array).toString('hex'); 
 
