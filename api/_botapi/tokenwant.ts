@@ -5,7 +5,7 @@ export async function getAccessToken() {
     const redis = getRedisClient();
 
     const timeout_time : number = Number(await redis.get("_token_timeout_time"));
-    if (timeout_time < Date.now()){
+    if (timeout_time > Date.now()){
         return await redis.get("_access_token");
     }else{
         const reply = await createRequest('https://bots.qq.com/app/getAppAccessToken','POST',{'Content-Type':'application/json'},
