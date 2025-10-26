@@ -4,7 +4,7 @@ export async function createRequest(url: string, method: string, headers: Record
     const requestData = {
         method: method,
         headers: headers,
-        body: body,
+        data: body,
         target: url
     }
 
