@@ -14,6 +14,7 @@ export async function getAccessToken() {
                 clientSecret: process.env.BOT_SECRET
             }
         )
+        console.log(reply)
         if(reply.status === 'succcess'){
             if(reply.data.status === 200){
                 await redis.set("_access_token",reply.data.data['access_token'])
